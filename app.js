@@ -46,6 +46,27 @@ app.get('/campgrounds/:id', async (req, res) => {
     res.render('campgrounds/show', {campground}); 
 })
 
+app.delete('/campgrounds/:id', async (req, res) => {
+    const {id} = req.params;
+    console.log('deleting campground')
+    await Campground.findByIdAndDelete(id);
+    res.redirect('/campgrounds')
+})
+
+app.patch('/campgrounds/:id', async (req, res) => {
+    const {id} = req.params;
+    console.log(req.body.campground)
+    await Campground.findByIdAndUpdate(id, req.body.campground);
+    res.redirect(`/campgrounds/${id}`);
+})
+
+app.get('/campgrounds/:id/edit', async (req, res) => {
+    const {id} = req.params;
+    const campground = await Campground.findById(id);
+    res.render('campgrounds/edit', {campground});
+})
+
+
 app.listen(3000, () => {
     console.log('listening on port', 3000);
 })
