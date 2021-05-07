@@ -37,24 +37,34 @@ router.post('/', validateCampground,catchAsync(async(req, res) => {
 router.get('/:id', catchAsync(async (req, res) => {
     const {id} = req.params;
     const campground = await Campground.findById(id).populate('reviews');
+    if(!campground){
+        req.flash('error', 'Campground does not exist');
+        res.redirect('/campgrounds')
+    }
     res.render('campgrounds/show', {campground}); 
 }))
 
 router.delete('/:id', catchAsync(async (req, res) => {
     const {id} = req.params;
     await Campground.findByIdAndDelete(id);
+    req.flash('success', 'Successfully deleted campground');
     res.redirect('/campgrounds')
 }))
 
 router.patch('/:id', validateCampground, catchAsync(async (req, res) => {
     const {id} = req.params;
     await Campground.findByIdAndUpdate(id, req.body.campground);
+    req.flash('success', 'Successfully updated campground!')
     res.redirect(`/campgrounds/${id}`);
 }))
 
 router.get('/:id/edit', catchAsync(async (req, res) => {
     const {id} = req.params;
     const campground = await Campground.findById(id);
+    if(!campground){
+        req.flash('error', 'Campground does not exist');
+        res.redirect('/campgrounds')
+    }
     res.render('campgrounds/edit', {campground});
 }))
 
