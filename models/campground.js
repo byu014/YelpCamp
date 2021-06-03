@@ -11,14 +11,26 @@ ImageSchema.virtual('thumbnail').get(function(){
     return this.url.replace('/upload', '/upload/w_200');
 })
 
+//allows for virtual properties to be passed in as a property of schema
+const opts = { toJSON: {virtuals: true}};
+
 const CampgroundSchema = new Schema({
     title: String,
     price: Number,
     description: String,
     location: String,
-    images: [
-        ImageSchema
-    ],
+    geometry:{
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    },
+    images: [ImageSchema],
     author: {
         type: Schema.Types.ObjectId,
         ref: 'User'
@@ -29,7 +41,15 @@ const CampgroundSchema = new Schema({
             ref: 'Review'
         }
     ]
+}, opts)
+
+CampgroundSchema.virtual('properties.popUpMarkup').get(function(){
+    return `
+            <strong><a href='/campgrounds/${this._id}'>${this.title}</a></strong>
+            <p>${this.description.substring(0,30)}...</p>
+    `
 })
+
 CampgroundSchema.post('findOneAndDelete', async function(doc){
     if(doc){
         await Review.remove({_id: {$in: doc.reviews}})
